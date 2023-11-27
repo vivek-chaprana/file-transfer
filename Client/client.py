@@ -32,16 +32,20 @@ def send_file(file_path, client_socket):
 
 def main():
 
+    # Get the IP address of the server from the user
     server_ip = input("Enter IP address from server side: ")
 
+    # Create a socket object
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect((server_ip, SERVER_PORT))
 
     # File path to send
     file_path = input("Enter file path: ")
 
+    # Send file to server
     send_file(file_path, client_socket)
 
+    # Close the socket
     client_socket.close()
 
 if __name__ == "__main__":

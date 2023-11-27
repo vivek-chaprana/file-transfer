@@ -5,6 +5,8 @@ import platform
 HOST = '0.0.0.0'
 PORT = 5555
 
+
+# Function to get IP addresses of this machine, regardless of the OS 
 def get_ip_addresses():
     ip_addresses = []
     try:
@@ -30,6 +32,7 @@ def get_ip_addresses():
         print(f"Error: {e}")
     return ip_addresses
 
+# Handle receiving of file from client
 def receive_file(client_socket):
     # Receive file name from client
     file_name = client_socket.recv(1024).decode().strip()
@@ -57,24 +60,27 @@ def receive_file(client_socket):
 
 def main():
 
+    # Get IP addresses of this machine and display them to the user
     ip_addresses = get_ip_addresses()
-
     print("Use one of the following IP addresses to connect to this server:")
     for ip_address in ip_addresses:
         print(ip_address)
 
+    # Create a socket object
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((HOST, PORT))
     server_socket.listen(1)
 
     print("Server waiting for connection...")
 
-
+    # Accept connection from client
     client_socket, addr = server_socket.accept()
     print(f"Connection from {addr}")
 
+    # Receive file from client
     receive_file(client_socket)
 
+    # Close the sockets
     client_socket.close()
     server_socket.close()
 
