@@ -3,6 +3,19 @@ import socket
 HOST = '0.0.0.0'
 PORT = 5555
 
+def discover_server_ip():
+    server_discovery_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    server_discovery_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server_discovery_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    server_discovery_socket.bind(('0.0.0.0', PORT))
+
+    print("Server waiting for discovery...")
+
+    while True:
+        data, addr = server_discovery_socket.recvfrom(1024)
+        if data == b"Looking for server":
+            server_discovery_socket.sendto(socket.gethostbyname(socket.gethostname()).encode(), addr)
+
 def receive_file(client_socket):
     # Receive file name from client
     file_name = client_socket.recv(1024).decode().strip()
@@ -29,6 +42,9 @@ def receive_file(client_socket):
     print("\nFile received successfully!")
 
 def main():
+
+    discover_server_ip()
+
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((HOST, PORT))
     server_socket.listen(1)
