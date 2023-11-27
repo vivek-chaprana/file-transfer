@@ -1,7 +1,7 @@
 import socket
 import os
 
-SERVER_IP = '192.168.1.100'  # Replace with the server's IP address
+SERVER_IP = '192.168.1.9'  # Replace with the server's IP address
 SERVER_PORT = 5555
 
 def send_file(file_path, client_socket):
@@ -14,7 +14,8 @@ def send_file(file_path, client_socket):
     # Send file size to server
     client_socket.sendall(file_size.to_bytes(8, byteorder='big'))
 
-    # Send file in chunks
+    # Send file in chunks with progress indication
+    sent_bytes = 0
     with open(file_path, 'rb') as file:
         print(f"Sending {file_name}...")
         while True:
@@ -22,6 +23,10 @@ def send_file(file_path, client_socket):
             if not data:
                 break
             client_socket.sendall(data)
+            sent_bytes += len(data)
+            # Calculate and display progress
+            progress = (sent_bytes / file_size) * 100
+            print(f"Progress: {progress:.2f}%\r", end='')
 
     print("\nFile sent successfully!")
 
@@ -30,8 +35,8 @@ def main():
     client_socket.connect((SERVER_IP, SERVER_PORT))
 
     # File path to send
-    file_path = input("Enter file path: ")
-    
+    file_path = input("Enter file path: ")  
+
     send_file(file_path, client_socket)
 
     client_socket.close()
