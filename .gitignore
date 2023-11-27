@@ -3,4 +3,4 @@
 
 # Except files
 !*.py
-!.md
+!*.md
