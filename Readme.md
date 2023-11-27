@@ -31,13 +31,13 @@ cd file-transfer
 - For server side
 
 ```bash
-python server.py
+python3 server.py
 ```
 
 - For client side
 
 ```bash
-python client.py
+python3 client.py
 ```
 
 ### Usage
