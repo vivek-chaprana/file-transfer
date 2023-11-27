@@ -1,7 +1,7 @@
 import socket
 import os
 
-SERVER_IP = '192.168.1.9'  # Replace with the server's IP address
+SERVER_IP = '192.168.1.100'  # Replace with the server's IP address
 SERVER_PORT = 5555
 
 def send_file(file_path, client_socket):
@@ -17,7 +17,10 @@ def send_file(file_path, client_socket):
     # Send file in chunks
     with open(file_path, 'rb') as file:
         print(f"Sending {file_name}...")
-        for data in iter(lambda: file.read(1024), b''):
+        while True:
+            data = file.read(1024)
+            if not data:
+                break
             client_socket.sendall(data)
 
     print("\nFile sent successfully!")
@@ -28,7 +31,7 @@ def main():
 
     # File path to send
     file_path = input("Enter file path: ")
-
+    
     send_file(file_path, client_socket)
 
     client_socket.close()
