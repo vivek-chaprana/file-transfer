@@ -27,7 +27,7 @@ def main():
     client_socket.connect((SERVER_IP, SERVER_PORT))
 
     # File path to send
-    file_path = 'file_to_send.ext'  # Replace with the path of the file you want to send
+    file_path = input("Enter file path: ")
 
     send_file(file_path, client_socket)
 
