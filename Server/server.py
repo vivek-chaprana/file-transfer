@@ -1,20 +1,34 @@
 import socket
+import subprocess
+import platform
 
 HOST = '0.0.0.0'
 PORT = 5555
 
-def discover_server_ip():
-    server_discovery_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    server_discovery_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_discovery_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    server_discovery_socket.bind(('0.0.0.0', PORT))
+def get_ip_addresses():
+    ip_addresses = []
+    try:
+        system = platform.system()
+        if system == 'Windows':
+            ipconfig_output = subprocess.check_output(['ipconfig']).decode('utf-8', 'ignore')
+            lines = ipconfig_output.split('\n')
+            for line in lines:
+                if 'IPv4 Address' in line:
+                    ip_addresses.append(line.strip().split(':')[-1].strip())
+            return ip_addresses
+        else:
+            ip_output = subprocess.check_output(['ifconfig']).decode('utf-8', 'ignore')
+            keyword = 'inet '
 
-    print("Server waiting for discovery...")
-
-    while True:
-        data, addr = server_discovery_socket.recvfrom(1024)
-        if data == b"Looking for server":
-            server_discovery_socket.sendto(socket.gethostbyname(socket.gethostname()).encode(), addr)
+        lines = ip_output.split('\n')
+        for line in lines:
+            if keyword in line:
+                ip = line.split(keyword)[-1].split()[0]
+                if '.' in ip:  # Basic validation for IPv4 address
+                    ip_addresses.append(ip)
+    except subprocess.CalledProcessError as e:
+        print(f"Error: {e}")
+    return ip_addresses
 
 def receive_file(client_socket):
     # Receive file name from client
@@ -43,13 +57,18 @@ def receive_file(client_socket):
 
 def main():
 
-    discover_server_ip()
+    ip_addresses = get_ip_addresses()
+
+    print("Use one of the following IP addresses to connect to this server:")
+    for ip_address in ip_addresses:
+        print(ip_address)
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((HOST, PORT))
     server_socket.listen(1)
 
     print("Server waiting for connection...")
+
 
     client_socket, addr = server_socket.accept()
     print(f"Connection from {addr}")
