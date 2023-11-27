@@ -40,7 +40,7 @@ def main():
     # File path to send
     file_path = input("Enter file path: ")
 
-    send_file(file_path, server_ip, client_socket)
+    send_file(file_path, client_socket)
 
     client_socket.close()
 
