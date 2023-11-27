@@ -1,39 +1,37 @@
 import socket
+import os
 
-# Client configuration
-SERVER_HOST = '192.168.137.1'  # Replace with the server's IP address
+SERVER_IP = '192.168.1.9'  # Replace with the server's IP address
 SERVER_PORT = 5555
 
-# Create a socket object
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+def send_file(file_path, client_socket):
+    file_name = os.path.basename(file_path)
+    file_size = os.path.getsize(file_path)
 
-# Connect to the server
-client_socket.connect((SERVER_HOST, SERVER_PORT))
+    # Send file name to server
+    client_socket.send(file_name.encode())
 
-print("Enter the path of the file you want to send: ");
-file_path = input();
+    # Send file size to server
+    client_socket.sendall(file_size.to_bytes(8, byteorder='big'))
 
-# file_path = 'filetosend.txt'  # Replace with the file you want to send
+    # Send file in chunks
+    with open(file_path, 'rb') as file:
+        print(f"Sending {file_name}...")
+        for data in iter(lambda: file.read(1024), b''):
+            client_socket.sendall(data)
 
-# Extract the file name from the file path
-file_name = file_path.split('/')[-1]
-
-
-# Get the size of the file
-file_size = os.path.getsize(file_path)
-
-# Send the file size to the server
-client_socket.send(str(file_size).encode())
-
-# Open and send the file in binary mode while displaying progress
-sent_bytes = 0
-with open(file_path, 'rb') as file:
-    print(f"Sending {file_name}...")
-    for data in file:
-        client_socket.sendall(data)
-        sent_bytes += len(data)
-        # Calculate and display progress
-        progress = (sent_bytes / file_size) * 100
-        print(f"Progress: {progress:.2f}%\r", end='')
     print("\nFile sent successfully!")
-client_socket.close()
+
+def main():
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect((SERVER_IP, SERVER_PORT))
+
+    # File path to send
+    file_path = 'file_to_send.ext'  # Replace with the path of the file you want to send
+
+    send_file(file_path, client_socket)
+
+    client_socket.close()
+
+if __name__ == "__main__":
+    main()
