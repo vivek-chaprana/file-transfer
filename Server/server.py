@@ -20,19 +20,23 @@ while True:
     client_socket, addr = server_socket.accept()
     print(f"Connection from {addr}")
 
-    # Receive file name from client
-    # file_name = client_socket.recv(1024).decode()
+    ## Receive file name from client
     file_name = client_socket.recv(1024).decode().strip()
-
+    
+    # Receive file size from client
+    file_size = int(client_socket.recv(1024).decode())
+    
     # Open the file received from the client in binary mode
+    received_bytes = 0
     with open(file_name, 'wb') as file:
         print(f"Receiving {file_name}...")
-        while True:
+        while received_bytes < file_size:
             # Receive file data in chunks
             data = client_socket.recv(1024)
-            if not data:
-                break
+            received_bytes += len(data)
             file.write(data)
-
-    print(f"{file_name} received successfully!")
+            # Calculate and display progress
+            progress = (received_bytes / file_size) * 100
+            print(f"Progress: {progress:.2f}%\r", end='')
+        print("\nFile received successfully!")
     client_socket.close()
